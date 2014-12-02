@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>MultiScroll</title>
+		
+		<style>
+/* Reset CSS
+ * --------------------------------------- */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,
+form,fieldset,input,textarea,p,blockquote,th,td {
+    padding: 0;
+    margin: 0;
+}
+a{
+	text-decoration:none;
+}
+table {
+    border-spacing: 0;    
+}
+fieldset,img {
+    border: 0;
+}
+address,caption,cite,code,dfn,em,strong,th,var {
+    font-weight: normal;
+    font-style: normal;
+}
+strong{
+	font-weight: bold;
+}
+ol,ul {
+    list-style: none;
+    margin:0;
+    padding:0;
+}
+caption,th {
+    text-align: left;
+
+}
+h1,h2,h3,h4,h5,h6 {
+    font-weight: normal;
+    font-size: 100%;
+    margin:0;
+    padding:0;
+    color:#444;
+}
+q:before,q:after {
+    content:'';
+}
+abbr,acronym { border: 0;
+}
+
+
+/* Custom CSS
+ * --------------------------------------- */
+body{
+	font-family: arial,helvetica;
+	color: #333;
+	color: rgba(0,0,0,0.5);
+}
+h1{
+	font-size: 6em;	
+}
+p{
+	font-size: 2em;
+}
+.ms-section{
+			text-align: center;
+		}
+		
+		
+html, body {
+    margin: 0;
+    padding: 0;
+	overflow:hidden;
+	height:100%;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+.ms-section {
+    position: relative;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.ms-left, .ms-right{
+	width:50%;
+	position:absolute;
+	height:100%;
+	-ms-touch-action:none;
+}
+
+
+.ms-right{
+	right:1px;
+	top:0px;
+	-webkit-transform:translate3d(0px, 0px , 0px);
+	-webkit-transition:all 0.5s ease-in-out;
+}
+
+.ms-left{
+	left:0;
+	top:0;
+	-webkit-transform:translate3d(0px, 0px , 0px);
+	-webkit-transition:all 0.5s ease-in-out;
+}
+
+.ms-left .ms-section{
+	background-color:#C63D0F;
+}
+
+.ms-right .ms-section{
+	background-color:#1BBC9B;
+}
+
+.ms-section{
+	position:relative;
+	height: 100%;
+}
+
+.ms-table{
+	display:table;
+	width:100%;
+}
+
+.ms-tableCell{
+	display:table-cell;
+	vertical-align:middle;
+}
+
+
+/**
+	menu style
+*/
+#menu li{
+	display:inline-block;
+	margin:10px;
+	color:#000;
+	background:#fff;
+	background:rgba(255, 255, 255, 1);
+	-webkit-border-radius: 10px;
+	border-radius:10px;
+}
+
+#menu li a{
+	text-decoration:none;
+	color:#000;
+	padding:9px 18px;
+	display:block;
+}
+
+
+#menu{
+	position:fixed;
+	top:0;
+	left:0;
+	height:40px;
+	z-index:40;
+	width:100%;
+	padding:0;
+	margin:0;
+}
+
+		</style>
+	</head>
+	
+	<body>
+		
+		<ul id="menu">
+			<li><a href="#anchour_0" onclick="updateWheelIndex(this.href); return false;">first</a></li>
+			<li><a href="#anchour_1" onclick="updateWheelIndex(this.href); return false;">second</a></li>
+			<li><a href="#anchour_2" onclick="updateWheelIndex(this.href); return false;">thrid</a></li>
+		</ul>
+		
+		<div id="myContainer">
+			
+			<div class="ms-left">
+				
+				<div class="ms-section ms-table" id="left1">
+					<div class="ms-tableCell">
+						<h1>Left 1 </h1>
+					</div>
+				</div>
+				<div class="ms-section ms-table" id="left2">
+					<div class="ms-tableCell">
+						<h1>Left2</h1>
+					</div>
+				</div>		
+				
+				<div class="ms-section ms-table" id="left3">
+					<div class="ms-tableCell">
+						<h1>Left3</h1>
+					</div>
+				</div>		
+				
+			</div>
+			
+			
+			
+			<div class="ms-right">
+				<div class="ms-section ms-table" id="right1">
+					<div class="ms-tableCell">
+						<h1>Right1</h1>
+					</div>
+				</div>
+				<div class="ms-section ms-table" id="right2">
+					<div class="ms-tableCell">
+						<h1>Right2</h1>
+					</div>
+				</div>
+				
+				<div class="ms-section ms-table" id="right3">
+					<div class="ms-tableCell">
+						<h1>Right3</h1>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		
+		<script>
+			
+			/**
+				스텝4. 앵커 태그 응용추가
+				스텝3. 좌상단 메뉴 추가 & 리사이즈 처리 & wheelIndex min, max처리 
+				스텝2. 마우스 휠에 따른 좌우 트랜지션 처리
+				스텝1. 기본 레이아웃 구성 및 이동처리
+			*/
+			var rSection = document.getElementsByClassName( "ms-right" );
+			var lSection = document.getElementsByClassName( "ms-left" );
+			var rContentArea 		= rSection[0];
+			var rContentList		= rContentArea.getElementsByClassName("ms-section");
+			var lContentArea		= lSection[0];
+			var lContentList		= lContentArea.getElementsByClassName("ms-section");
+			
+			var contentHeight		= getBoundRectWithTarget(rContentArea).height;
+			var wheelIndex		= 0;
+			var maxIndex			= (rContentList.length-1);
+			
+			
+			/**
+				교차 스크롤 처리를 위해 
+				오른쪽 영역은 순서를 뒤집은 후 미리 이동처리 해둠. 
+			*/
+			function initializeContentLayout(){
+				var i;
+				var sectionNode;
+				for( i=0; i<rContentList.length;i++){
+					
+					sectionNode =rContentList[i];
+					sectionNode.setAttribute( "data-anchour", "anchour_"+i);
+					
+					sectionNode =lContentList[i];
+					sectionNode.setAttribute( "data-anchour", "anchour_"+i);
+					
+					if(i>0){
+						rContentArea.insertBefore( rContentList[i], rContentList[0] );
+					}
+					
+				}
+				
+				rContentArea.style.transform = rContentArea.webKitTransform = "translate3d(0px, -"+ getBoundRectWithTarget(  rContentList[maxIndex]).top +"px, 0px)";
+				
+			}
+			
+			
+			/**
+				컨테이너 트랜지션 처리 함수
+			*/	
+			function updateSectionPosition(){
+				
+				var lposH = (contentHeight * wheelIndex );
+				var rposH = (contentHeight * ( maxIndex - wheelIndex ) );
+				//console.log( "l-pos", lposH, "r-pos", rposH, "contentHeight", contentHeight );
+				rContentArea.style.transform = rContentArea.webKitTransform = "translate3d(0px, -"+ rposH +"px, 0px)";
+				lContentArea.style.transform = rContentArea.webKitTransform = "translate3d(0px, -"+ lposH +"px, 0px)";
+			
+			}
+			
+			/**
+				엘리먼트 영역정보 반환
+			*/		
+			function getBoundRectWithTarget( target ){
+				return target.getBoundingClientRect();
+			}
+			
+			
+			/**
+				리사이즈 시 
+				contentHeight값을 조절하고 
+				컨텐츠 위치 조정
+			*/
+			function onResize_Document( e ){
+				
+				contentHeight		= getBoundRectWithTarget(rContentArea).height;
+				updateSectionPosition();
+				
+			}
+			
+			
+			/**
+				wheel이벤트 처리 
+					좌우는 서로 반대로 움직여야 함.
+					그렇다면 값은 어떻게 해야 할까.
+			*/
+			function onMouseWheel_Scroll( e ){
+				var delta = e.wheelDelta ? e.wheelDelta : e.detail ? e.detail : 0 ;
+				if( delta > 0 ){
+					wheelIndex--;
+				} else {
+					wheelIndex++;
+				}
+				if( wheelIndex <= 0 ) wheelIndex = 0;
+				if( wheelIndex >= maxIndex ) wheelIndex = maxIndex;
+				updateSectionPosition();
+			}
+			
+			/**
+				menu이벤트 처리 
+					메뉴 클릭에 다른 업데이트 처리
+			*/
+			function updateWheelIndex( strAnchour ){
+				console.log( strAnchour );
+				var hash =strAnchour.substring(strAnchour.indexOf("#")); 
+				location.hash = hash;
+				
+				wheelIndex = parseInt( hash.substring(hash.indexOf("_")+1) );
+				updateSectionPosition();
+			}
+			
+			
+			function initializeMouseWheelEvent(){
+				document.addEventListener( "mousewheel", onMouseWheel_Scroll );
+				document.addEventListener( "DOMMouseScroll", onMouseWheel_Scroll );
+			}
+			
+			
+			function initializeResizeEvent(){
+				window.addEventListener( "resize", onResize_Document );
+			}
+		
+			initializeContentLayout();
+			initializeMouseWheelEvent();
+			initializeResizeEvent();
+			
+		</script>
+		
+	</body>
+	
+</html>
